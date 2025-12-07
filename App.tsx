@@ -5,6 +5,7 @@ import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiSe
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
+import ResultsScreenDemo from './components/ResultsScreenDemo';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION: Replace this URL with your own image URL or Base64 string.
@@ -14,6 +15,7 @@ const HERO_IMAGE_URL = "https://www.famousbirthdays.com/faces/clavicular-image.j
 const App: React.FC = () => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showResultsDemo, setShowResultsDemo] = useState(false);
 
   // Auth Listener
   useEffect(() => {
@@ -302,12 +304,20 @@ const App: React.FC = () => {
       <div className="h-full flex flex-col pt-8 pb-24 px-6 relative">
          <div className="flex justify-between items-center mb-6">
             <h1 className="text-4xl font-extrabold tracking-tighter">FaceiQ</h1>
-            <button 
-                onClick={() => auth.signOut()}
-                className="p-3 bg-zinc-900 rounded-full text-zinc-400 hover:text-white transition-colors"
-            >
-                <User size={24} />
-            </button>
+            <div className="flex gap-2">
+                <button
+                    onClick={() => setShowResultsDemo(true)}
+                    className="px-3 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold hover:bg-purple-700 transition-colors"
+                >
+                    Demo
+                </button>
+                <button
+                    onClick={() => auth.signOut()}
+                    className="p-3 bg-zinc-900 rounded-full text-zinc-400 hover:text-white transition-colors"
+                >
+                    <User size={24} />
+                </button>
+            </div>
          </div>
 
          {/* Hero Image / Placeholder */}
@@ -597,6 +607,21 @@ const App: React.FC = () => {
 
   if (!user) {
       return <Auth />;
+  }
+
+  // DEMO MODE: Show ResultsScreen component
+  if (showResultsDemo) {
+      return (
+          <div className="relative">
+              <button
+                  onClick={() => setShowResultsDemo(false)}
+                  className="fixed top-4 right-4 z-[100] bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-lg hover:bg-purple-700"
+              >
+                  Exit Demo
+              </button>
+              <ResultsScreenDemo />
+          </div>
+      );
   }
 
   return (
