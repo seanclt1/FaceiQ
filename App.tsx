@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Zap, Activity, MessageSquare, Upload, X, ChevronRight, ChevronLeft, User, Swords, Trophy, AlertTriangle, Scan, Eye, Dumbbell, Sparkles, Scissors, Shield } from 'lucide-react';
 import { AnalysisResult, AppTab, TIER_MAP, COACH_TOPICS, DAILY_TASKS, ChatMessage, MogResult } from './types';
-import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiService';
+import { analyzeFace, compareFaces } from './services/faceppService';
+import { getCoachResponse } from './services/geminiService';
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
@@ -330,7 +331,7 @@ const App: React.FC = () => {
                       <Scan size={20} strokeWidth={2} />
                       <span>Scan Face</span>
                     </button>
-                    <p className="text-zinc-400 text-xs mt-5 font-medium tracking-wide">Powered by Gemini 3 • 100% Private</p>
+                    <p className="text-zinc-400 text-xs mt-5 font-medium tracking-wide">Powered by Face++ • 100% Private</p>
                   </div>
                </div>
             </div>
