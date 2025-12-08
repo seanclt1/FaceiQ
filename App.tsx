@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Zap, Activity, MessageSquare, Upload, X, ChevronRight, ChevronLeft, User, Swords, Trophy, AlertTriangle, Scan, Eye, Dumbbell, Sparkles, Scissors, Shield } from 'lucide-react';
-import { AnalysisResult, AppTab, TIER_MAP, COACH_TOPICS, DAILY_TASKS, ChatMessage, MogResult } from './types';
+import { Camera, Zap, MessageSquare, Upload, ChevronRight, ChevronLeft, User, Swords, Trophy, AlertTriangle, Scan, Eye, Dumbbell, Sparkles, Scissors, Shield } from 'lucide-react';
+import { AnalysisResult, AppTab, COACH_TOPICS, DAILY_TASKS, ChatMessage, MogResult } from './types';
 import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiService';
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
