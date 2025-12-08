@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Zap, Activity, MessageSquare, Upload, X, ChevronRight, ChevronLeft, User, Swords, Trophy, AlertTriangle, Scan, Eye, Dumbbell, Sparkles, Scissors, Shield } from 'lucide-react';
+import { Camera, Zap, Activity, MessageSquare, Upload, X, ChevronRight, ChevronLeft, User, Swords, Trophy, AlertTriangle, Scan, Eye, Dumbbell, Sparkles, Scissors, Shield, Crown } from 'lucide-react';
 import { AnalysisResult, AppTab, TIER_MAP, COACH_TOPICS, DAILY_TASKS, ChatMessage, MogResult } from './types';
 import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiService';
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
+import PricingScreen from './components/PricingScreen';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION: Replace this URL with your own image URL or Base64 string.
@@ -189,7 +190,7 @@ const App: React.FC = () => {
 
     // Horizontal swipe detection (dominance > vertical) & threshold (50px)
     if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-      const tabs = [AppTab.SCAN, AppTab.EXTRAS, AppTab.DAILY, AppTab.COACH];
+      const tabs = [AppTab.SCAN, AppTab.EXTRAS, AppTab.DAILY, AppTab.COACH, AppTab.PRICING];
       const currentIndex = tabs.indexOf(activeTab);
 
       if (diffX > 0) {
@@ -612,6 +613,7 @@ const App: React.FC = () => {
         {activeTab === AppTab.DAILY && renderDailyView()}
         {activeTab === AppTab.COACH && renderCoachView()}
         {activeTab === AppTab.EXTRAS && renderExtrasView()}
+        {activeTab === AppTab.PRICING && <PricingScreen />}
       </main>
 
       {/* Bottom Navigation */}
@@ -640,12 +642,20 @@ const App: React.FC = () => {
            <span className="text-[10px] font-bold tracking-wide">DAILY</span>
         </button>
 
-        <button 
+        <button
           onClick={() => setActiveTab(AppTab.COACH)}
           className={`flex flex-col items-center gap-1 transition-colors ${activeTab === AppTab.COACH ? 'text-white' : 'text-zinc-600'}`}
         >
            <MessageSquare size={24} />
            <span className="text-[10px] font-bold tracking-wide">COACH</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab(AppTab.PRICING)}
+          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === AppTab.PRICING ? 'text-yellow-400' : 'text-zinc-600'}`}
+        >
+           <Crown size={24} />
+           <span className="text-[10px] font-bold tracking-wide">PRO</span>
         </button>
       </nav>
 

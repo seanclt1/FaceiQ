@@ -35,7 +35,8 @@ export enum AppTab {
   SCAN = 'scan',
   EXTRAS = 'extras',
   DAILY = 'daily',
-  COACH = 'coach'
+  COACH = 'coach',
+  PRICING = 'pricing'
 }
 
 export const TIER_MAP = [
@@ -62,4 +63,136 @@ export const COACH_TOPICS = [
   { id: 'fat', title: 'Lose body fat', icon: '🏃', color: 'from-orange-400 to-red-500' },
   { id: 'skin', title: 'Get clear skin', icon: '🧴', color: 'from-yellow-300 to-lime-500' },
   { id: 'jaw', title: 'Sharpen my jawline', icon: '🗿', color: 'from-blue-500 to-indigo-500' },
+];
+
+// Subscription & Pricing Types
+export type ProductType = 'subscription' | 'boost_pack' | 'feature_pack';
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  type: ProductType;
+  duration?: string; // For subscriptions (e.g., "1 week", "1 month")
+  quantity?: number; // For boost packs
+  features?: string[];
+  popular?: boolean;
+}
+
+export interface UserSubscription {
+  id: string;
+  productId: string;
+  startDate: Date;
+  endDate: Date;
+  isActive: boolean;
+  autoRenew: boolean;
+}
+
+export interface UserPurchases {
+  subscriptions: UserSubscription[];
+  boosts: number;
+  unlockedPacks: string[];
+}
+
+// Pricing Constants - In-App Purchases
+export const SUBSCRIPTION_PRODUCTS: Product[] = [
+  {
+    id: 'faceiq_pro_weekly',
+    name: 'FaceiQ Pro (1 Week)',
+    description: 'Unlock all premium features for 1 week',
+    price: 3.99,
+    currency: 'USD',
+    type: 'subscription',
+    duration: '1 week',
+    features: [
+      'Unlimited face scans',
+      'Detailed analysis reports',
+      'Priority AI coaching',
+      'Ad-free experience'
+    ],
+    popular: true
+  },
+  {
+    id: 'faceiq_ai_weekly',
+    name: 'FaceiQ AI - Weekly (1 Week)',
+    description: 'Full AI-powered analysis suite',
+    price: 3.99,
+    currency: 'USD',
+    type: 'subscription',
+    duration: '1 week',
+    features: [
+      'Advanced AI analysis',
+      'Personalized improvement plans',
+      'Progress tracking',
+      'Weekly reports'
+    ]
+  }
+];
+
+export const BOOST_PRODUCTS: Product[] = [
+  {
+    id: 'boosts_3',
+    name: '3 Boosts',
+    description: 'Get 3 additional face analysis boosts',
+    price: 2.99,
+    currency: 'USD',
+    type: 'boost_pack',
+    quantity: 3
+  },
+  {
+    id: 'boosts_5',
+    name: '5 Boosts',
+    description: 'Get 5 additional face analysis boosts',
+    price: 3.99,
+    currency: 'USD',
+    type: 'boost_pack',
+    quantity: 5,
+    popular: true
+  },
+  {
+    id: 'boosts_9',
+    name: '9 Boosts',
+    description: 'Get 9 additional face analysis boosts',
+    price: 5.99,
+    currency: 'USD',
+    type: 'boost_pack',
+    quantity: 9
+  }
+];
+
+export const FEATURE_PACK_PRODUCTS: Product[] = [
+  {
+    id: 'hairstyles_pack',
+    name: 'Hairstyles Pack',
+    description: 'Unlock AI hairstyle recommendations',
+    price: 4.99,
+    currency: 'USD',
+    type: 'feature_pack',
+    features: [
+      'Personalized hairstyle suggestions',
+      'Virtual hair try-on',
+      'Style matching algorithm'
+    ]
+  },
+  {
+    id: 'chad_pack',
+    name: 'Chad Pack',
+    description: 'Exclusive Chad-tier analysis tools',
+    price: 0.99,
+    currency: 'USD',
+    type: 'feature_pack',
+    features: [
+      'Chad potential calculator',
+      'Elite tier comparison',
+      'Exclusive badges'
+    ]
+  }
+];
+
+export const ALL_PRODUCTS: Product[] = [
+  ...SUBSCRIPTION_PRODUCTS,
+  ...BOOST_PRODUCTS,
+  ...FEATURE_PACK_PRODUCTS
 ];
