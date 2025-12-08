@@ -312,18 +312,26 @@ const App: React.FC = () => {
 
          {/* Hero Image / Placeholder */}
          <div className="flex-1 flex flex-col relative">
+            {/* X Close Button - Outside the picture in the black area */}
+            <button
+              className="absolute -top-2 right-0 z-20 w-8 h-8 bg-zinc-200 hover:bg-white text-zinc-800 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all"
+              aria-label="Close"
+            >
+              <X size={18} strokeWidth={2.5} />
+            </button>
+
             <div className="w-full h-full max-h-[75vh] bg-zinc-900 rounded-[2.5rem] overflow-hidden relative group border border-zinc-800 shadow-2xl">
-               <img 
-                 src={HERO_IMAGE_URL} 
+               <img
+                 src={HERO_IMAGE_URL}
                  className="w-full h-full object-cover opacity-60 grayscale group-hover:opacity-80 transition-opacity duration-500"
-                 alt="Model" 
+                 alt="Model"
                />
-               
+
                {/* Overlay Content */}
                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-brand-black via-black/20 to-transparent">
                   <div className="w-full px-6 pb-8 text-center">
                     <p className="text-white text-xl font-medium mb-6 drop-shadow-md leading-tight">Know your stats.<br/>Maximize your potential.</p>
-                    <button 
+                    <button
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full bg-brand-primary hover:bg-violet-600 text-white font-semibold py-3.5 rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2.5 text-base"
                     >
@@ -334,12 +342,31 @@ const App: React.FC = () => {
                   </div>
                </div>
             </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*" 
-              onChange={handleFileSelect} 
+
+            {/* Footer Links - Privacy/Restore wide, Terms/Policy centered */}
+            <div className="flex items-center justify-between w-full mt-4 px-1">
+              <button className="text-zinc-500 hover:text-zinc-300 text-[11px] font-medium tracking-wide transition-colors">
+                Privacy
+              </button>
+              <div className="flex items-center gap-4">
+                <button className="text-zinc-500 hover:text-zinc-300 text-[11px] font-medium tracking-wide transition-colors">
+                  Terms
+                </button>
+                <button className="text-zinc-500 hover:text-zinc-300 text-[11px] font-medium tracking-wide transition-colors">
+                  Policy
+                </button>
+              </div>
+              <button className="text-zinc-500 hover:text-zinc-300 text-[11px] font-medium tracking-wide transition-colors">
+                Restore
+              </button>
+            </div>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleFileSelect}
             />
          </div>
       </div>
