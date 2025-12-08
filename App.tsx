@@ -5,6 +5,8 @@ import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiSe
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
+import { SubscriptionPopup } from './components/SubscriptionPopup';
+import { useSubscription } from './hooks/useSubscription';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION: Replace this URL with your own image URL or Base64 string.
@@ -14,6 +16,11 @@ const HERO_IMAGE_URL = "https://www.famousbirthdays.com/faces/clavicular-image.j
 const App: React.FC = () => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
+  const [popupDismissed, setPopupDismissed] = useState(false);
+
+  // Subscription hook
+  const subscription = useSubscription();
 
   // Auth Listener
   useEffect(() => {
@@ -23,6 +30,27 @@ const App: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Show subscription popup on launch if not subscribed
+  useEffect(() => {
+    if (!authLoading && user && !subscription.hasActiveSubscription && !popupDismissed) {
+      // Small delay to let the app render first
+      const timer = setTimeout(() => {
+        setShowSubscriptionPopup(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [authLoading, user, subscription.hasActiveSubscription, popupDismissed]);
+
+  const handleCloseSubscriptionPopup = () => {
+    setShowSubscriptionPopup(false);
+    setPopupDismissed(true);
+  };
+
+  const handleSubscriptionSuccess = () => {
+    setShowSubscriptionPopup(false);
+    setPopupDismissed(true);
+  };
 
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.SCAN);
   
@@ -601,7 +629,16 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-brand-black min-h-screen text-white font-sans selection:bg-brand-primary selection:text-white max-w-md mx-auto relative border-x border-zinc-900 shadow-2xl">
-      
+
+      {/* Subscription Popup */}
+      {showSubscriptionPopup && (
+        <SubscriptionPopup
+          subscription={subscription}
+          onClose={handleCloseSubscriptionPopup}
+          onSuccess={handleSubscriptionSuccess}
+        />
+      )}
+
       {/* Dynamic Content */}
       <main 
         className="h-screen overflow-y-auto no-scrollbar"

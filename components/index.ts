@@ -2,6 +2,7 @@
 export { default as ResultsScreen } from './ResultsScreen';
 export { default as ScoreCard } from './ScoreCard';
 export { default as Auth } from './Auth';
+export { SubscriptionPopup } from './SubscriptionPopup';
 
 // Type exports
 export type {

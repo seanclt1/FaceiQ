@@ -63,3 +63,33 @@ export const COACH_TOPICS = [
   { id: 'skin', title: 'Get clear skin', icon: '🧴', color: 'from-yellow-300 to-lime-500' },
   { id: 'jaw', title: 'Sharpen my jawline', icon: '🗿', color: 'from-blue-500 to-indigo-500' },
 ];
+
+// Subscription Types
+export interface SubscriptionProduct {
+  id: string;
+  name: string;
+  price: number;
+  period: 'weekly' | 'yearly' | 'one_time';
+  pricePerWeek?: number;
+  savings?: number;
+}
+
+export interface SubscriptionState {
+  isSubscribed: boolean;
+  subscriptionType: string | null;
+  expiresAt: Date | null;
+  isTrial: boolean;
+  trialEndsAt: Date | null;
+  purchases: string[];
+}
+
+export const SUBSCRIPTION_PRODUCTS: SubscriptionProduct[] = [
+  { id: 'faceiq_pro_weekly', name: 'Face iQ Pro (1 Week)', price: 3.99, period: 'weekly' },
+  { id: 'faceiq_weekly', name: 'Face iQ - Weekly (1 Week)', price: 3.99, period: 'weekly' },
+  { id: 'faceiq_yearly', name: 'Face iQ - Yearly', price: 29.99, period: 'yearly', pricePerWeek: 0.58, savings: 93 },
+  { id: 'hairstyles_pack', name: 'Hairstyles Pack', price: 4.99, period: 'one_time' },
+  { id: 'boosts_5', name: '5 Boosts', price: 3.99, period: 'one_time' },
+  { id: 'boosts_3', name: '3 Boosts', price: 2.99, period: 'one_time' },
+  { id: 'boosts_9', name: '9 Boosts', price: 5.99, period: 'one_time' },
+  { id: 'chad_pack', name: 'Chad Pack', price: 0.99, period: 'one_time' },
+];
