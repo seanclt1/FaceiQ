@@ -5,24 +5,75 @@ import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiSe
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
+import Onboarding, { OnboardingAnswers } from './components/Onboarding';
+import Paywall from './components/Paywall';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION: Replace this URL with your own image URL or Base64 string.
 // -----------------------------------------------------------------------------
 const HERO_IMAGE_URL = "https://www.famousbirthdays.com/faces/clavicular-image.jpg";
 
+// Onboarding flow steps
+type OnboardingStep = 'onboarding' | 'paywall' | 'complete';
+
 const App: React.FC = () => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Onboarding flow state
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(() => {
+    // Check localStorage for returning users
+    const completed = localStorage.getItem('faceiq_onboarding_complete');
+    return completed === 'true' ? 'complete' : 'onboarding';
+  });
+  const [userAnswers, setUserAnswers] = useState<OnboardingAnswers | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(() => {
+    return localStorage.getItem('faceiq_subscription');
+  });
 
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
+
+      // Reset onboarding for new users (no localStorage entry)
+      if (currentUser) {
+        const userOnboardingKey = `faceiq_onboarding_${currentUser.uid}`;
+        const completed = localStorage.getItem(userOnboardingKey);
+        setOnboardingStep(completed === 'true' ? 'complete' : 'onboarding');
+      }
     });
     return () => unsubscribe();
   }, []);
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = (answers: OnboardingAnswers) => {
+    setUserAnswers(answers);
+    // Store answers for personalization
+    if (user) {
+      localStorage.setItem(`faceiq_answers_${user.uid}`, JSON.stringify(answers));
+    }
+    setOnboardingStep('paywall');
+  };
+
+  // Handle subscription
+  const handleSubscribe = (plan: 'yearly' | 'weekly' | 'trial') => {
+    setSubscriptionStatus(plan);
+    localStorage.setItem('faceiq_subscription', plan);
+    if (user) {
+      localStorage.setItem(`faceiq_onboarding_${user.uid}`, 'true');
+    }
+    setOnboardingStep('complete');
+  };
+
+  // Handle paywall dismiss (user taps X to skip)
+  const handlePaywallDismiss = () => {
+    if (user) {
+      localStorage.setItem(`faceiq_onboarding_${user.uid}`, 'true');
+    }
+    setOnboardingStep('complete');
+  };
 
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.SCAN);
   
@@ -597,6 +648,15 @@ const App: React.FC = () => {
 
   if (!user) {
       return <Auth />;
+  }
+
+  // Onboarding Flow for authenticated users
+  if (onboardingStep === 'onboarding') {
+      return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  if (onboardingStep === 'paywall') {
+      return <Paywall onSubscribe={handleSubscribe} onDismiss={handlePaywallDismiss} />;
   }
 
   return (
