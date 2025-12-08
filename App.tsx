@@ -5,6 +5,8 @@ import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiSe
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
+import Onboarding, { OnboardingAnswers } from './components/Onboarding';
+import Paywall from './components/Paywall';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION: Replace this URL with your own image URL or Base64 string.
@@ -15,6 +17,16 @@ const App: React.FC = () => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // Onboarding & Paywall State
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(() => {
+    return localStorage.getItem('faceiq_onboarding_completed') === 'true';
+  });
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [isPremiumUser, setIsPremiumUser] = useState<boolean>(() => {
+    return localStorage.getItem('faceiq_premium') === 'true';
+  });
+  const [onboardingAnswers, setOnboardingAnswers] = useState<OnboardingAnswers | null>(null);
+
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -23,6 +35,32 @@ const App: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Handle onboarding completion - shows paywall after survey
+  const handleOnboardingComplete = (answers: OnboardingAnswers) => {
+    setOnboardingAnswers(answers);
+    localStorage.setItem('faceiq_onboarding_answers', JSON.stringify(answers));
+    setShowPaywall(true);
+  };
+
+  // Handle subscription selection
+  const handleSubscribe = (plan: 'yearly' | 'weekly' | 'trial') => {
+    // In production, this would trigger actual payment flow
+    console.log(`User selected plan: ${plan}`);
+    localStorage.setItem('faceiq_premium', 'true');
+    localStorage.setItem('faceiq_subscription_plan', plan);
+    localStorage.setItem('faceiq_onboarding_completed', 'true');
+    setIsPremiumUser(true);
+    setHasCompletedOnboarding(true);
+    setShowPaywall(false);
+  };
+
+  // Handle paywall dismissal (X button)
+  const handlePaywallDismiss = () => {
+    localStorage.setItem('faceiq_onboarding_completed', 'true');
+    setHasCompletedOnboarding(true);
+    setShowPaywall(false);
+  };
 
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.SCAN);
   
@@ -597,6 +635,16 @@ const App: React.FC = () => {
 
   if (!user) {
       return <Auth />;
+  }
+
+  // Onboarding Flow - Show survey slides for new users
+  if (!hasCompletedOnboarding && !showPaywall) {
+      return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  // Paywall - Show after onboarding survey is completed
+  if (showPaywall) {
+      return <Paywall onSubscribe={handleSubscribe} onDismiss={handlePaywallDismiss} />;
   }
 
   return (
