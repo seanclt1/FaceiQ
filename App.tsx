@@ -5,6 +5,8 @@ import { analyzeFace, getCoachResponse, compareFaces } from './services/geminiSe
 import ScoreCard from './components/ScoreCard';
 import { auth, onAuthStateChanged, User as FirebaseUser } from './services/firebase';
 import Auth from './components/Auth';
+import PaymentPopup from './components/PaymentPopup';
+import { hasActiveSubscription, wasPaywallDismissed, dismissPaywall } from './services/subscriptionService';
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION: Replace this URL with your own image URL or Base64 string.
@@ -14,6 +16,7 @@ const HERO_IMAGE_URL = "https://www.famousbirthdays.com/faces/clavicular-image.j
 const App: React.FC = () => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 
   // Auth Listener
   useEffect(() => {
@@ -23,6 +26,26 @@ const App: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Check subscription status on app load
+  useEffect(() => {
+    if (user && !authLoading) {
+      // Show payment popup if user doesn't have active subscription
+      // and hasn't dismissed it this session
+      if (!hasActiveSubscription() && !wasPaywallDismissed()) {
+        setShowPaymentPopup(true);
+      }
+    }
+  }, [user, authLoading]);
+
+  const handlePaymentClose = () => {
+    dismissPaywall();
+    setShowPaymentPopup(false);
+  };
+
+  const handleSubscribed = () => {
+    setShowPaymentPopup(false);
+  };
 
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.SCAN);
   
@@ -301,7 +324,7 @@ const App: React.FC = () => {
     return (
       <div className="h-full flex flex-col pt-8 pb-24 px-6 relative">
          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-4xl font-extrabold tracking-tighter">FaceiQ</h1>
+            <h1 className="text-4xl font-extrabold tracking-tighter">Face iQ</h1>
             <button 
                 onClick={() => auth.signOut()}
                 className="p-3 bg-zinc-900 rounded-full text-zinc-400 hover:text-white transition-colors"
@@ -589,7 +612,7 @@ const App: React.FC = () => {
           <div className="bg-brand-black min-h-screen flex items-center justify-center text-white">
               <div className="animate-pulse flex flex-col items-center">
                   <div className="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <span className="text-sm font-medium text-zinc-400">Loading FaceiQ...</span>
+                  <span className="text-sm font-medium text-zinc-400">Loading Face iQ...</span>
               </div>
           </div>
       );
@@ -601,7 +624,14 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-brand-black min-h-screen text-white font-sans selection:bg-brand-primary selection:text-white max-w-md mx-auto relative border-x border-zinc-900 shadow-2xl">
-      
+
+      {/* Payment Popup */}
+      <PaymentPopup
+        isOpen={showPaymentPopup}
+        onClose={handlePaymentClose}
+        onSubscribed={handleSubscribed}
+      />
+
       {/* Dynamic Content */}
       <main 
         className="h-screen overflow-y-auto no-scrollbar"
