@@ -35,7 +35,8 @@ export enum AppTab {
   SCAN = 'scan',
   EXTRAS = 'extras',
   DAILY = 'daily',
-  COACH = 'coach'
+  COACH = 'coach',
+  RATING = 'rating'
 }
 
 export const TIER_MAP = [

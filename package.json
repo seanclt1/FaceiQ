@@ -1,32 +1,24 @@
 {
-  "name": "copy-of-copy-of-faceiq",
+  "name": "clav",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@google/genai": "^1.31.0",
-    "firebase": "^12.6.0",
-    "lucide-react": "^0.556.0",
+    "react-dom": "^19.2.1",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "lucide-react": "^0.556.0",
+    "firebase": "^12.6.0"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
-    "jsdom": "^27.3.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0",
-    "vitest": "^4.0.15"
+    "vite": "^6.2.0"
   }
 }
