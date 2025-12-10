@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { AnalysisResult, MogResult } from "../types";
+import { AnalysisResult, ChatMessage } from "../types";
 
 // Initialize Gemini Client
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -42,18 +42,6 @@ const ANALYSIS_SCHEMA: Schema = {
     }
   },
   required: ["scores", "tier", "feedback", "improvements"]
-};
-
-const MOG_SCHEMA: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    winnerIndex: { type: Type.INTEGER, description: "0 for the first image, 1 for the second image." },
-    winnerTitle: { type: Type.STRING, description: "Short, hype title like 'MOGGED', 'DOMINATION', 'CLOSE CALL'." },
-    diffScore: { type: Type.NUMBER, description: "The score difference between the two faces." },
-    reason: { type: Type.STRING, description: "The specific facial feature that won the battle (e.g. 'Superior Jawline Definition')." },
-    roast: { type: Type.STRING, description: "A one-sentence brutal roast for the loser." }
-  },
-  required: ["winnerIndex", "winnerTitle", "diffScore", "reason", "roast"]
 };
 
 export const analyzeFace = async (base64Image: string): Promise<AnalysisResult> => {
@@ -109,75 +97,41 @@ export const analyzeFace = async (base64Image: string): Promise<AnalysisResult> 
   }
 };
 
-export const compareFaces = async (img1Base64: string, img2Base64: string): Promise<MogResult> => {
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: {
-                parts: [
-                    { inlineData: { mimeType: 'image/jpeg', data: img1Base64 } },
-                    { inlineData: { mimeType: 'image/jpeg', data: img2Base64 } },
-                    {
-                        text: `Compare these two faces based on aesthetic "Looksmaxxing" standards (Hunter eyes, Jawline, Symmetry, Dimorphism).
-                        Decide who "Mogs" (dominates) the other.
-                        Be extremely direct, using slang like "Mogged", "It's over", "Stat check".
-                        
-                        - winnerIndex: 0 (First Image) or 1 (Second Image).
-                        - winnerTitle: Short impact phrase (e.g. "LEFT MOGS", "RIGHT DOMINATES").
-                        - roast: Roast the loser's weakest feature.
-                        `
-                    }
-                ]
-            },
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: MOG_SCHEMA
-            }
-        });
+export const getCoachResponse = async (
+  message: string, 
+  history: ChatMessage[],
+  analysisContext?: AnalysisResult | null
+): Promise<string> => {
+  try {
+    const contextString = analysisContext 
+      ? `User Context: Overall Score ${analysisContext.scores.overall}, Tier: ${analysisContext.tier}. Weak points: ${analysisContext.improvements.map(i => i.area).join(', ')}.`
+      : "User has not been analyzed yet. Ask them to scan their face.";
 
-        if (response.text) {
-            return JSON.parse(response.text) as MogResult;
-        }
-        throw new Error("No comparison generated");
-    } catch (error) {
-        console.error("Comparison failed", error);
-        return {
-            winnerIndex: 0,
-            winnerTitle: "ERROR",
-            diffScore: 0,
-            reason: "Could not compare",
-            roast: "Try again."
-        }
-    }
-}
+    const historyText = history.map(h => `${h.role}: ${h.text}`).join('\n');
 
-export const getCoachResponse = async (message: string, history: any[]) => {
-    // Basic chat interface using the flash model for speed
-    const chat = ai.chats.create({
-        model: 'gemini-2.5-flash',
-        config: {
-            systemInstruction: `You are an AI aesthetics coach.
-Your responses must follow these rules:
+    const prompt = `
+      System: You are 'Coach Chad', an elite aesthetics and looksmaxxing expert. 
+      Your goal is to help the user maximize their facial potential.
+      Keep answers short (under 50 words), punchy, and use terminology like 'positive canthal tilt', 'forward growth', 'mewing', 'hunter eyes', etc.
+      Focus on actionable advice. Do not be overly polite. Be a coach.
+      
+      ${contextString}
 
-Keep every answer short, simple, and direct (1–3 sentences MAX).
+      Current Conversation:
+      ${historyText}
 
-Write like a high-confidence Gen-Z fitness/aesthetics coach — clear, casual, no cringe.
+      User: ${message}
+      Model:
+    `;
 
-Never write long paragraphs, explanations, or essays unless the user explicitly requests depth.
-
-Prioritize actionable advice over theory.
-
-No emojis unless the user uses emojis first.
-
-Avoid filler words like “here’s the tea,” “let me explain,” or anything that slows the message.
-
-Responses should feel quick, helpful, interesting, and easy to skim in an app UI.
-
-Your job: Give fast answers about looksmaxxing, fitness, grooming, and style with a tight, scroll-friendly tone.`
-        },
-        history: history
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
     });
 
-    const response = await chat.sendMessage({ message });
-    return response.text;
+    return response.text || "Focus on the basics: Mewing, chewing, and sleep.";
+  } catch (error) {
+    console.error("Coach error:", error);
+    return "I'm analyzing another face right now. Try again in a second.";
+  }
 };
